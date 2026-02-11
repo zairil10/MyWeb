@@ -5,3 +5,10 @@ img {
   height: 400px;
   object-fit: cover;
 }
+
+/*
+  Temporary soln
+*/
+h1 {
+  visibility: hidden;
+}
