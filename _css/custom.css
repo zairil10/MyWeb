@@ -9,6 +9,7 @@ img {
 /*
   Temporary soln
 */
+/* Hide top-level generated page title (site header) */
 h1 {
-  visibility: hidden;
+  display: none !important;
 }
