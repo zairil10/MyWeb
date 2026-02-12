@@ -4,42 +4,48 @@ on:
     branches:
       - main
       - master
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
       with:
         persist-credentials: false
-    # NOTE: Python is necessary for the pre-rendering (minification) step
-    - name: Install python
+
+    # Install Python (needed for minification)
+    - name: Install Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.8'
-    # NOTE: Here you can install dependencies such as matplotlib if you use
-    # packages such as PyPlot.
+
+    # Install css_html_js_minify to avoid Franklin warnings
+    - name: Install css_html_js_minify
+      run: pip install css-html-js-minify
+
+    # Optional: install other Python dependencies if needed
     # - run: pip install matplotlib
+
+    # Install Julia
     - name: Install Julia
       uses: julia-actions/setup-julia@v1
       with:
-        version: '1' # Latest stable Julia release.
-    # NOTE
-    #   The steps below ensure that NodeJS and Franklin are loaded then it
-    #   installs highlight.js which is needed for the prerendering step
-    #   (code highlighting + katex prerendering).
-    #   Then the environment is activated and instantiated to install all
-    #   Julia packages which may be required to successfully build your site.
-    #   The last line should be `optimize()` though you may want to give it
-    #   specific arguments, see the documentation or ?optimize in the REPL.
-    - run: julia -e '
+        version: '1.12' # Pin to match your local Julia version
+
+    # Build the site with Franklin
+    - name: Build site
+      run: julia -e '
             using Pkg; Pkg.activate("."); Pkg.instantiate();
             using NodeJS; run(`$(npm_cmd()) install highlight.js`);
             using Franklin;
             optimize()'
-    - name: Build and Deploy
+
+    # Deploy to GitHub Pages
+    - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@releases/v3
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
