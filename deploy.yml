@@ -1,0 +1,42 @@
+name: Deploy Franklin site
+
+on:
+  push:
+    branches:
+      - main  # change if your default branch is different
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Install Julia
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v1
+        with:
+          version: '1.12'
+
+      # Install Python (needed for css_html_js_minify and plots)
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install css-html-js-minify matplotlib
+
+      # Install Julia packages
+      - name: Instantiate Julia project
+        run: julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate()'
+
+      # Build Franklin site
+      - name: Build Franklin site
+        run: julia -e 'using Franklin; optimize(prerender=true)'
+
+      # Optionally, deploy to GitHub Pages
+      # You can add your deployment step here
